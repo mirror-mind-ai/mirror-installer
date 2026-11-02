@@ -11,16 +11,32 @@ English, and works under user folders with accents and spaces.
 
 ## Install
 
-1. Download `MirrorMind-Setup-<version>.exe` from the
-   [latest release](https://github.com/mirror-mind-ai/mirror-installer/releases/latest).
-   `SHA256SUMS` beside it lets you check the file.
-2. The `.exe` is not code-signed yet. On the first download Windows may show
-   "Windows protected your PC": click **More info → Run anyway**.
-3. Click **Install** and wait while it prepares Node, Git and Pi.
-4. At "Almost there", type your name and paste an
+**Recommended: one line in PowerShell.** Open PowerShell (Start menu, type
+*PowerShell*), paste this line and press Enter:
+
+```powershell
+irm https://raw.githubusercontent.com/mirror-mind-ai/mirror-installer/main/get.ps1 | iex
+```
+
+It downloads the installer from the
+[latest release](https://github.com/mirror-mind-ai/mirror-installer/releases/latest),
+checks it against the published SHA-256, and opens it. Downloaded this way,
+Windows shows no "Windows protected your PC" warning; the script is
+[get.ps1](get.ps1), short enough to read first.
+
+**Or download the `.exe`** (`MirrorMind-Setup-<version>.exe`) from the
+[latest release](https://github.com/mirror-mind-ai/mirror-installer/releases/latest),
+with `SHA256SUMS` beside it to check the file. It is not code-signed yet, so
+on the first download Windows may show "Windows protected your PC": click
+**More info → Run anyway**.
+
+Then, in the wizard:
+
+1. Click **Install** and wait while it prepares Node, Git and Pi.
+2. At "Almost there", type your name and paste an
    [OpenRouter key](https://openrouter.ai/keys) (`sk-or-…`; the button on the
    page opens it). The account needs some credit — five dollars, for example.
-5. Finish with "Open Mirror Mind" checked, and ask it something.
+3. Finish with "Open Mirror Mind" checked, and ask it something.
 
 A narrated walkthrough in Portuguese is attached to each release.
 

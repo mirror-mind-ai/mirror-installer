@@ -144,8 +144,21 @@ builds the `.exe`, and stops there; the maintainer creates the GitHub Release
 from its artifact, after both Sandbox profiles pass. The `.exe` is never in
 git.
 
-**Not code-signed yet.** SmartScreen warns on first downloads, and the release
-notes say what to click. Signing (Azure Trusted Signing) is a later decision.
+**Not code-signed yet, and a way in that needs no signature.** SmartScreen
+warns about a file that carries the "mark of the web", the `Zone.Identifier`
+stream a browser writes on every download, while the file has no reputation.
+A file PowerShell downloads carries no such mark (checked on Windows
+PowerShell 5.1 with the released `.exe`). So the first way in is one line,
+`irm .../get.ps1 | iex`, the same form Pi's own installer uses: `get.ps1`
+downloads the latest release's `.exe` and `SHA256SUMS`, refuses to run
+anything if the hash does not match or the checksum file names anything but
+`MirrorMind-Setup-<version>.exe`, clears the mark in case a later PowerShell
+writes one, and opens the same wizard. The hash check takes the place of the
+browser's reputation check. The `.exe` stays downloadable by hand, with the
+warning and what to click. Signing, so that the browser download is clean too,
+is a later decision: SignPath Foundation (free for open source, the publisher
+shown as the foundation) or Azure Trusted Signing (paid, the project's own
+name), shared with Mirror Desktop.
 
 **A separate repository.** The installer is Windows-only tooling, and the core
 deliberately carries none: its CI runs on Ubuntu and macOS, and its own tests
