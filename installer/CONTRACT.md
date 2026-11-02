@@ -13,9 +13,15 @@ can update itself from (`runtime update` used to fail with npm `EBUSY`;
 [mirror#46](https://github.com/mirror-mind-ai/mirror/pull/46), CR189). Tested
 with Git 2.56.0.2, Pi 1.4.0 (the contract, 35/35 with `-ThenUpdateToLatest`,
 2026-10-31) and Pi 1.5.0 with Node 24.22.2 (the built `.exe` end to end in
-Windows Sandbox, 2026-11-02); Pi and Node are installed at their latest. The update path itself
-is exercised end to end at the next core release, when `latest` moves past
-the pin; until then that step reads "already current".
+Windows Sandbox, 2026-11-02); Pi and Node are installed at their latest.
+
+**The update path, for real:** on 2026-11-02 `latest` moved to 0.39.1, and
+`-ThenUpdateToLatest` took an install of the pin from 0.39.0 to 0.39.1 on
+Windows (`runtime update` exit 0, the contract 35/35 after it): the first
+update a Windows install of this layout applied by itself. 0.39.1 changes the
+Pi extension only (it finds Node as the hook wrappers do, CR191; the installer
+sets both `PATH` and `MIRROR_NODE`), so the pin stays at 0.39.0 and installed
+users take 0.39.1 through `runtime update`.
 
 **The contract also held, unchanged, against** `mirror-mind` 0.35.0, 0.36.0,
 0.36.2, 0.37.0 (migration 018 applies on first open), 0.38.0 and 0.38.1
