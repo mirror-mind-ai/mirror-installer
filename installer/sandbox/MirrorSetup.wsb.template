@@ -1,0 +1,26 @@
+<Configuration>
+  <!-- Mirror Mind installer: a clean Windows, the .exe read-only, the setup log
+       written back to the host. A template: start.ps1 fills {{REPO}} and starts
+       it; then next-next-finish. -->
+  <Networking>Enable</Networking>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>{{REPO}}\dist</HostFolder>
+      <SandboxFolder>C:\Setup</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>{{REPO}}\installer\sandbox</HostFolder>
+      <SandboxFolder>C:\SandboxTools</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>{{REPO}}\out\sandbox</HostFolder>
+      <SandboxFolder>C:\Out</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>cmd.exe /c start "Mirror Mind setup" powershell.exe -NoExit -ExecutionPolicy Bypass -File C:\SandboxTools\run-setup.ps1</Command>
+  </LogonCommand>
+</Configuration>

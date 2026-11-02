@@ -1,0 +1,5 @@
+# Build output and local runs: nothing here is source.
+dist/
+out/
+.local/
+__pycache__/

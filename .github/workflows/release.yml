@@ -1,0 +1,72 @@
+# Builds the release .exe on a tag v<installer version>, after the contract
+# against the pinned core passes. The installer has its own version
+# (installer/VERSION) and pins the core version it was tested against
+# (installer/MIRROR_VERSION); a core release does not need an installer
+# release -- installed users update through `mirror runtime update`.
+#
+# The workflow builds and checks; it does not publish. The .exe and
+# SHA256SUMS land as a workflow artifact, and the maintainer creates the
+# GitHub Release from them, so the release is signed off by a person rather
+# than by the bot:
+#   gh run download <run-id> -n installer
+#   gh release create v<version> MirrorMind-Setup-<version>.exe SHA256SUMS \
+#     --title "Mirror Mind for Windows <version> (mirror-mind <core>)" \
+#     --notes-file docs/releases/v<version>.md
+#
+# Before the tag: installer/tests/contract.ps1 green, both Sandbox profiles
+# green, installer/VERSION and MIRROR_VERSION bumped,
+# docs/releases/v<version>.md written. See installer/TESTING.md.
+#
+# The .exe is not code-signed. SmartScreen shows "Windows protected your PC"
+# on first downloads; the release notes say what to click. Signing (Azure
+# Trusted Signing) is a later decision.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: Versions
+        id: v
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}" -replace "^v", ""
+          $file = (Get-Content installer/VERSION -Raw).Trim()
+          if ($tag -ne $file) { throw "tag says $tag, installer/VERSION says $file" }
+          if (-not (Test-Path "docs/releases/v$file.md")) { throw "docs/releases/v$file.md is missing" }
+          "version=$file" >> $env:GITHUB_OUTPUT
+          "mirror=$((Get-Content installer/MIRROR_VERSION -Raw).Trim())" >> $env:GITHUB_OUTPUT
+      - name: Contract against the pinned core
+        shell: pwsh
+        run: installer/tests/contract.ps1 -ThenUpdateToLatest
+      - name: Inno Setup
+        shell: pwsh
+        run: choco install innosetup --no-progress -y | Out-Null
+      - name: Build
+        shell: pwsh
+        run: installer/build.ps1 -OutputDir "${{ runner.temp }}\out"
+      - name: Checksums
+        shell: pwsh
+        run: |
+          Set-Location "${{ runner.temp }}\out"
+          Get-ChildItem *.exe | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_ -Algorithm SHA256).Hash.ToLower(), $_.Name } | Set-Content SHA256SUMS -Encoding ascii
+          Get-Content SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: |
+            ${{ runner.temp }}/out/*.exe
+            ${{ runner.temp }}/out/SHA256SUMS
+          if-no-files-found: error
