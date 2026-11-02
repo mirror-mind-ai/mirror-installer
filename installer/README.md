@@ -90,7 +90,8 @@ What the installer relies on from the core, line by line, is
 ```powershell
 installer\build.ps1                       # -> dist\MirrorMind-Setup-<VERSION>.exe, with MIRROR_VERSION
 installer\tests\contract.ps1              # the contract against MIRROR_VERSION (-ThenUpdateToLatest as CI runs it)
-installer\sandbox\start.ps1 -PerfilPT     # or without -PerfilPT for the clean profile
+installer\sandbox\start.ps1 -PerfilPT     # by hand; or without -PerfilPT for the clean profile
+installer\video\record-frames.ps1 -PerfilPT   # the same check, unattended (OPENROUTER_API_KEY set)
 installer\assets\build-icon.ps1           # regenerate mirror.ico and the wizard images
 ```
 

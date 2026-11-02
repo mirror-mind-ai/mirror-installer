@@ -8,8 +8,13 @@
     OPENROUTER_API_KEY in the environment: the demo asks Mirror one real
     question. The key is written into out\sandbox for the run only, shown
     masked on screen, and deleted when the run ends.
+
+    -PerfilPT runs the release's end-to-end check instead: the same install,
+    unattended, under a simulated accented user folder. Its frames, logs and
+    report.json stay in out\sandbox\perfil-pt; the video frames are untouched.
 #>
-param([int]$TimeoutMin = 25)
+param([int]$TimeoutMin = 25, [switch]$PerfilPT)
+$sub = if ($PerfilPT) { "perfil-pt" } else { "demo" }
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repo = (Resolve-Path (Join-Path $here "..\..")).Path
 $out = Join-Path $repo "out\sandbox"
@@ -18,7 +23,7 @@ Remove-Item "$out\*" -Recurse -Force -ErrorAction SilentlyContinue
 $key = $env:OPENROUTER_API_KEY
 if (-not $key) { throw "OPENROUTER_API_KEY is not set: the demo asks Mirror one real question" }
 [IO.File]::WriteAllText("$out\openrouter.key", $key.Trim(), (New-Object Text.UTF8Encoding $false))
-$wsb = & (Join-Path $repo "installer\sandbox\New-SandboxConfig.ps1") -Template (Join-Path $here "MirrorDemo.wsb.template")
+$wsb = & (Join-Path $repo "installer\sandbox\New-SandboxConfig.ps1") -Template (Join-Path $here "MirrorDemo.wsb.template") -Arguments $(if ($PerfilPT) { "-PerfilPT" } else { "" })
 $sb = Start-Process "WindowsSandbox.exe" -ArgumentList "`"$wsb`"" -PassThru
 # The Sandbox is a VM shown over RDP: what is not on screen is not drawn, and
 # captures taken inside come back white. Keep its window restored, maximized
@@ -52,7 +57,7 @@ try {
     while (((Get-Date) - $t0).TotalMinutes -lt $TimeoutMin) {
         Start-Sleep 15
         WatchShot
-        $log = Get-Content "$out\demo\capture.log" -ErrorAction SilentlyContinue
+        $log = Get-Content "$out\$sub\capture.log" -ErrorAction SilentlyContinue
         if ($log) { $log | Select-Object -Last 1 | Write-Host }
         if (($log -join "`n") -match "\] done$") { break }
     }
@@ -69,7 +74,8 @@ try {
         Write-Host "sandbox still up after wsb stop; close its window by hand"
     }
 }
-Get-ChildItem "$out\demo\*.png" | ForEach-Object { "{0}  {1}" -f $_.Name, $_.Length }
+Get-ChildItem "$out\$sub\*.png" | ForEach-Object { "{0}  {1}" -f $_.Name, $_.Length }
+if ($PerfilPT) { Get-Content "$out\$sub\report.json" -ErrorAction SilentlyContinue; return }
 # gravar.py reads the frames, and the install log for the versions on the closing card.
 $frames = Join-Path $repo "out\video\frames"
 New-Item -ItemType Directory -Force $frames | Out-Null

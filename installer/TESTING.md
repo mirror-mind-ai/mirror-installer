@@ -8,7 +8,7 @@ other way round.
 |---|---|---|---|---|
 | **Contract** | `tests/contract.ps1`: the commands `install.ps1` runs, against a core version, in a throwaway prefix and home; then `runtime update` to latest and the same checks again. Asserts [CONTRACT.md](CONTRACT.md) line by line. | host or `windows-latest` | every change under `installer/`; **daily against `mirror-mind@latest`** (the canary) | ~1 min |
 | **Build check** | compile the `.exe`, open it once (InitializeWizard runs; nothing installs) | `windows-latest` | every change under `installer/` | ~2 min |
-| **End to end** | Windows Sandbox: `sandbox/start.ps1` (clean) and `sandbox/start.ps1 -PerfilPT` (profile `C:\Users\João Çãõ Silva`, `/LANG=pt`); wizard, Finished-page checkbox opens Mirror, `listar minhas personas` answers with twelve names | a Windows machine with the Sandbox feature; someone at the keyboard (or `video/record-frames.ps1`, which drives it unattended) | before an installer release; when the canary turns red | ~5 min each |
+| **End to end** | Windows Sandbox: `sandbox/start.ps1` (clean) and `sandbox/start.ps1 -PerfilPT` (profile `C:\Users\João Çãõ Silva`, `/LANG=pt`); wizard, Finished-page checkbox opens Mirror, `listar minhas personas` answers with twelve names | a Windows machine with the Sandbox feature; someone at the keyboard, or unattended: `video/record-frames.ps1` (clean profile, the video's run) and `video/record-frames.ps1 -PerfilPT` (accented profile; writes `out\sandbox\perfil-pt\report.json` and `runtime-status.txt`). Both need `OPENROUTER_API_KEY` and the Sandbox window left alone | before an installer release; when the canary turns red | ~5 min each |
 
 ## What each layer catches
 

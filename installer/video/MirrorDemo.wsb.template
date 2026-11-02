@@ -20,6 +20,6 @@
     </MappedFolder>
   </MappedFolders>
   <LogonCommand>
-    <Command>powershell.exe -ExecutionPolicy Bypass -WindowStyle Minimized -File C:\SandboxTools\demo-capture.ps1</Command>
+    <Command>powershell.exe -ExecutionPolicy Bypass -WindowStyle Minimized -File C:\SandboxTools\demo-capture.ps1 {{ARGS}}</Command>
   </LogonCommand>
 </Configuration>

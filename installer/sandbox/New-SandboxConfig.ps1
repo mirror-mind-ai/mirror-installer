@@ -7,13 +7,15 @@
     repository would name one person's checkout. The templates carry
     {{REPO}}; the rendered .wsb lands in out\ (ignored by git), next to
     out\sandbox, the folder the Sandbox writes its logs and frames into.
+    -Arguments fills {{ARGS}}, where a template passes switches to the
+    script it starts.
 #>
-param([Parameter(Mandatory)][string]$Template)
+param([Parameter(Mandatory)][string]$Template, [string]$Arguments = "")
 $ErrorActionPreference = "Stop"
 $repo = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $out = Join-Path $repo "out"
 New-Item -ItemType Directory -Force (Join-Path $out "sandbox") | Out-Null
-$text = [IO.File]::ReadAllText((Resolve-Path $Template).Path).Replace("{{REPO}}", $repo)
+$text = [IO.File]::ReadAllText((Resolve-Path $Template).Path).Replace("{{REPO}}", $repo).Replace("{{ARGS}}", $Arguments)
 $dest = Join-Path $out ((Split-Path $Template -Leaf) -replace "\.template$", "")
 [IO.File]::WriteAllText($dest, $text, (New-Object Text.UTF8Encoding $false))
 $dest

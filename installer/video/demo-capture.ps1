@@ -8,7 +8,14 @@
     Started by MirrorDemo.wsb as the LogonCommand. Reads C:\Out\openrouter.key
     (written by the host just for the run). Nothing here touches the host.
     Frames are window captures (not full screen), so the player can frame them.
+
+    -PerfilPT runs the same install, unattended, under a simulated Brazilian
+    user folder (a space, c-cedilla and tildes; the name is built from
+    character codes, as in run-setup.ps1) with that name typed on the identity
+    page: the end-to-end check TESTING.md asks for before a release. Its
+    frames, logs and report.json land in C:\Out\perfil-pt, not in the video.
 #>
+param([switch]$PerfilPT)
 $ErrorActionPreference = "Continue"
 Add-Type -AssemblyName System.Drawing, System.Windows.Forms
 Add-Type @"
@@ -33,7 +40,7 @@ public static class W {
   }
 }
 "@
-$Out = "C:\Out\demo"; New-Item -ItemType Directory -Force $Out | Out-Null
+$Out = if ($PerfilPT) { "C:\Out\perfil-pt" } else { "C:\Out\demo" }; New-Item -ItemType Directory -Force $Out | Out-Null
 $Log = "$Out\capture.log"
 function Say($m) { $l = "[{0}] {1}" -f (Get-Date -Format "HH:mm:ss"), $m; Write-Host $l; Add-Content $Log $l }
 function FindWin([string]$titleLike, [int]$timeoutSec = 60) {
@@ -73,6 +80,19 @@ $key = (Get-Content "C:\Out\openrouter.key" -Raw -ErrorAction SilentlyContinue)
 if ($key) { $key = $key.Trim() }
 if (-not $key) { Say "no C:\Out\openrouter.key"; exit 1 }
 $name = "Helena"
+$dirArg = @()
+if ($PerfilPT) {
+    # The profile run-setup.ps1 simulates: USERPROFILE, HOME, APPDATA and LOCALAPPDATA
+    # under an accented folder, inherited by the setup, install.ps1 and Mirror.
+    $name = "Jo" + [char]0xE3 + "o " + [char]0xC7 + [char]0xE3 + [char]0xF5 + " Silva"
+    $profile = "C:\Users\$name"
+    foreach ($d in @("$profile\AppData\Roaming", "$profile\AppData\Local", "$profile\Desktop")) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
+    $env:USERPROFILE = $profile; $env:HOME = $profile
+    $env:APPDATA = "$profile\AppData\Roaming"; $env:LOCALAPPDATA = "$profile\AppData\Local"
+    $dirArg = @(('/DIR="{0}\AppData\Local\Programs\MirrorMind"' -f $profile))
+    Say "simulated profile: $profile"
+}
+$appDir = "$env:LOCALAPPDATA\Programs\MirrorMind"
 
 # --- 1. the wizard -------------------------------------------------------------
 $setup = Get-ChildItem "C:\Setup\MirrorMind-Setup-*.exe" | Sort-Object LastWriteTime | Select-Object -Last 1
@@ -80,8 +100,8 @@ Say "setup: $($setup.Name)"
 # A quiet desktop: the Sandbox opens the LogonCommand console; minimize it.
 $me = [W]::GetForegroundWindow(); [void][W]::ShowWindow($me, 6)
 # install.ps1 mirrors its detail log here; gravar.py reads the versions on the closing card from it.
-$env:MIRROR_LOG_DIR = "C:\Out\demo"
-Start-Process $setup.FullName -ArgumentList "/LANG=pt", "/LOG=C:\Out\demo\setup.log", "/NAME=$name", "/KEYFILE=C:\Out\openrouter.key"
+$env:MIRROR_LOG_DIR = $Out
+Start-Process $setup.FullName -ArgumentList (@("/LANG=pt", "/LOG=$Out\setup.log", "/NAME=`"$name`"", "/KEYFILE=C:\Out\openrouter.key") + $dirArg)
 $wiz = FindWin "Mirror Mind*Instalador*" 60
 if (-not $wiz) { Say "wizard window not found"; exit 1 }
 $h = $wiz.MainWindowHandle
@@ -92,7 +112,7 @@ Start-Sleep 3
 Shot $h "02-instalando-inicio"
 # wait for bootstrap: the transcript's MIRRORDONE line
 $t0 = Get-Date
-$logs = "C:\Users\$env:USERNAME\AppData\Local\Programs\MirrorMind\logs"
+$logs = "$appDir\logs"
 $mid = $false
 while (((Get-Date) - $t0).TotalMinutes -lt 20) {
     Start-Sleep 2
@@ -159,4 +179,25 @@ $scr = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 $bmp = New-Object System.Drawing.Bitmap $scr.Width, $scr.Height
 $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen(0, 0, 0, 0, $bmp.Size); $bmp.Save("$Out\12-desktop.png"); $g.Dispose()
 Copy-Item "$logs\*" $Out -Force -ErrorAction SilentlyContinue
+
+# --- 3. what the install left, for the host to check -----------------------------
+# runtime status from the install's own launcher, in the (possibly simulated)
+# profile's environment; the runtime's logs; and where every piece landed.
+[Console]::OutputEncoding = New-Object Text.UTF8Encoding $false   # the status prints the accented path
+$status = (& "$appDir\node\mirror.cmd" runtime status 2>&1) -join "`n"
+[IO.File]::WriteAllText("$Out\runtime-status.txt", $status, (New-Object Text.UTF8Encoding $false))
+Get-ChildItem "$env:USERPROFILE\.mirror-minds\*\*.log" -ErrorAction SilentlyContinue | ForEach-Object { Copy-Item $_.FullName "$Out\mirror-$($_.Name)" -Force }
+$envFile = "$env:USERPROFILE\.config\mirror\env"
+$piSettings = "$env:USERPROFILE\.pi\agent\settings.json"
+$report = [ordered]@{
+    profile = $env:USERPROFILE
+    appDir = $appDir
+    mirrorMinds = @(Get-ChildItem "$env:USERPROFILE\.mirror-minds" -Directory -ErrorAction SilentlyContinue | ForEach-Object Name)
+    mirrorUser = ((Get-Content $envFile -Encoding UTF8 -ErrorAction SilentlyContinue) | Where-Object { $_ -match '^MIRROR_USER=' }) -replace '^MIRROR_USER=', ''
+    piShellPath = (Get-Content $piSettings -Raw -Encoding UTF8 -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue).shellPath
+    piShellExists = $false
+    desktopShortcut = (Test-Path "$env:USERPROFILE\Desktop\Mirror Mind.lnk")
+} 
+if ($report.piShellPath) { $report.piShellExists = (Test-Path $report.piShellPath) }
+[IO.File]::WriteAllText("$Out\report.json", ($report | ConvertTo-Json), (New-Object Text.UTF8Encoding $false))
 Say "done"
