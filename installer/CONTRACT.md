@@ -8,20 +8,27 @@ installer reads from the core, so that a change on either side is a known
 event rather than a surprise. It is extracted from `install.ps1` and the two
 launchers; `tests/contract.ps1` asserts every line of it.
 
-**Pinned:** `mirror-mind@0.39.0`, the first core release a Windows install
-can update itself from (`runtime update` used to fail with npm `EBUSY`;
-[mirror#46](https://github.com/mirror-mind-ai/mirror/pull/46), CR189). Tested
-with Git 2.56.0.2, Pi 1.4.0 (the contract, 35/35 with `-ThenUpdateToLatest`,
-2026-10-31) and Pi 1.5.0 with Node 24.22.2 (the built `.exe` end to end in
-Windows Sandbox, 2026-11-02); Pi and Node are installed at their latest.
+**Pinned:** `mirror-mind@0.39.3` (installer 2.0.1), the first core release in
+which every Windows fix the installer needed has landed: Claude Code's hooks
+and the plugin's MCP server run the package's own bin when npm's global entry
+is a shell shim ([mirror#53](https://github.com/mirror-mind-ai/mirror/pull/53);
+on 0.39.0 every hook ended `node exited 1` on a Windows package install),
+`runtime diagnose` reads the PATH the platform's way and no longer counts its
+own verdict as an error ([mirror#49](https://github.com/mirror-mind-ai/mirror/pull/49),
+[mirror#50](https://github.com/mirror-mind-ai/mirror/pull/50)), and stdin is
+decoded by its mark (CR194). The contract passed 35/35 with
+`-ThenUpdateToLatest` on 2026-11-03. Installer 2.0.0 pinned 0.39.0, the first
+release a Windows install can update itself from (`runtime update` used to fail
+with npm `EBUSY`; [mirror#46](https://github.com/mirror-mind-ai/mirror/pull/46),
+CR189). Git 2.56.0.2; Pi and Node are installed at their latest.
 
 **The update path, for real:** on 2026-11-02 `latest` moved to 0.39.1, and
 `-ThenUpdateToLatest` took an install of the pin from 0.39.0 to 0.39.1 on
 Windows (`runtime update` exit 0, the contract 35/35 after it): the first
 update a Windows install of this layout applied by itself. 0.39.1 changes the
 Pi extension only (it finds Node as the hook wrappers do, CR191; the installer
-sets both `PATH` and `MIRROR_NODE`), so the pin stays at 0.39.0 and installed
-users take 0.39.1 through `runtime update`.
+sets both `PATH` and `MIRROR_NODE`), and installed users take each release
+through `runtime update`.
 
 **The contract also held, unchanged, against** `mirror-mind` 0.35.0, 0.36.0,
 0.36.2, 0.37.0 (migration 018 applies on first open), 0.38.0 and 0.38.1

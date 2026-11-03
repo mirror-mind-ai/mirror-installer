@@ -32,6 +32,8 @@ def versao() -> str:
 
 
 VERSAO = versao()
+# The file chapter 2 shows is the one this video's release ships.
+ARQUIVO = "MirrorMind-Setup-" + (RAIZ / "installer/VERSION").read_text(encoding="utf-8").strip() + ".exe"
 
 # Cenas na ordem do roteiro. rect = [x, y, w, h] em pixels do frame.
 CENAS = [
@@ -103,7 +105,7 @@ const geo={};
 for(const c of CENAS){
   const el=document.createElement('div');el.className='cena';el.id='c'+c.n;
   if(c.tipo==='card'){el.innerHTML=`<div class="cartao">${c.n===12?'<img class="icone" src="__ICONE__">':''}${c.k?`<div class="k">${c.k}</div>`:''}${c.h1?`<h1>${c.h1}</h1>`:''}${c.ps.map(p=>`<p>${p}</p>`).join('')}</div>`;}
-  else if(c.tipo==='arquivo'){el.innerHTML=`<div class="arquivo"><div class="ico"><img src="__ICONE__"><span>MirrorMind-Setup-2.0.0.exe</span></div></div>`;}
+  else if(c.tipo==='arquivo'){el.innerHTML=`<div class="arquivo"><div class="ico"><img src="__ICONE__"><span>__ARQUIVO__</span></div></div>`;}
   else{const im=new Image();im.src=c.tela;el.dataset.pendente='1';
     el.innerHTML=`<div class="janela"><img class="a" src="${c.tela}">${c.depois?`<img class="b" src="${c.depois}" style="opacity:0">`:''}</div>`;}
   palco.appendChild(el);
@@ -155,7 +157,7 @@ def main():
     total = INTRO + t + OUTRO
     html = (PLAYER.replace("__CENAS__", json.dumps(CENAS, ensure_ascii=False)).replace("__TEMPOS__", json.dumps(tempos))
             .replace("__LEGENDAS__", json.dumps({int(k): v for k, v in legendas.items()}, ensure_ascii=False))
-            .replace("__INTRO__", str(INTRO)).replace("__OUTRO__", str(OUTRO)).replace("__VERSAO__", VERSAO)
+            .replace("__INTRO__", str(INTRO)).replace("__OUTRO__", str(OUTRO)).replace("__VERSAO__", VERSAO).replace("__ARQUIVO__", ARQUIVO)
             .replace("__ICONE__", ICONE.as_uri()))
     (FRAMES / "player.html").write_text(html, encoding="utf-8")
 
