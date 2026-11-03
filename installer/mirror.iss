@@ -68,7 +68,9 @@ SetupLogging=yes
 SetupIconFile=assets\mirror.ico
 WizardSmallImageFile=assets\wizard-small.bmp,assets\wizard-small-200.bmp
 UninstallDisplayIcon={app}\bin\mirror.ico
-ShowLanguageDialog=yes
+; Ask for the language only when Windows is in neither: pt-BR and English
+; users go straight to Welcome (the identity page still switches it).
+ShowLanguageDialog=auto
 UninstallDisplayName={#AppName}
 
 [Languages]
@@ -324,7 +326,7 @@ begin
   LangCombo.Left := SW - LangCombo.Width;
   LangCombo.Top := BannerImage.Top + (BannerImage.Height - LangCombo.Height) div 2;
   LangCombo.Items.Add('English');
-  LangCombo.Items.Add('Portugues (Brasil)');
+  LangCombo.Items.Add('Português (Brasil)');
   if CurLang = 'pt' then LangCombo.ItemIndex := 1 else LangCombo.ItemIndex := 0;
   LangCombo.OnChange := @LangComboChange;
 
