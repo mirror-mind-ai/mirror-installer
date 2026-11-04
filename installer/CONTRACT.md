@@ -28,7 +28,9 @@ Windows (`runtime update` exit 0, the contract 35/35 after it): the first
 update a Windows install of this layout applied by itself. 0.39.1 changes the
 Pi extension only (it finds Node as the hook wrappers do, CR191; the installer
 sets both `PATH` and `MIRROR_NODE`), and installed users take each release
-through `runtime update`.
+through `runtime update`. On 2026-11-04 the same path took an install of the
+0.39.3 pin to 0.39.4 (Claude Code replies kept for queued prompts and
+journey switches, `logger.ts` only), 35/35 after it; the pin stays at 0.39.3.
 
 **The contract also held, unchanged, against** `mirror-mind` 0.35.0, 0.36.0,
 0.36.2, 0.37.0 (migration 018 applies on first open), 0.38.0 and 0.38.1
