@@ -31,6 +31,11 @@ sets both `PATH` and `MIRROR_NODE`), and installed users take each release
 through `runtime update`. On 2026-11-04 the same path took an install of the
 0.39.3 pin to 0.39.4 (Claude Code replies kept for queued prompts and
 journey switches, `logger.ts` only), 35/35 after it; the pin stays at 0.39.3.
+On 2026-11-05 it took the pin to 0.39.5 (CR192: every reader of `MIRROR_NODE`
+uses it only as an absolute path to an executable file, the installer's
+`…\Programs\MirrorMind\node\node.exe` included, and names a refused value in
+`hooks.log`), 35/35 after it. The installer's form was checked against that
+rule on Windows before the tag.
 
 **The contract also held, unchanged, against** `mirror-mind` 0.35.0, 0.36.0,
 0.36.2, 0.37.0 (migration 018 applies on first open), 0.38.0 and 0.38.1
