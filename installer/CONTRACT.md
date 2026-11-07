@@ -8,8 +8,13 @@ installer reads from the core, so that a change on either side is a known
 event rather than a surprise. It is extracted from `install.ps1` and the two
 launchers; `tests/contract.ps1` asserts every line of it.
 
-**Pinned:** `mirror-mind@0.39.3` (installer 2.0.1), the first core release in
-which every Windows fix the installer needed has landed: Claude Code's hooks
+**Pinned:** `mirror-mind@0.40.0` (installer 2.0.2), the core's first stable
+release under its release train: a session's replies go into its own
+conversation only (CR151) and a Journey can be deleted with its records (CR200);
+no schema change. The contract passed 21/21 against it and 35/35 with
+`-ThenUpdateToLatest` from the 2.0.1 pin on 2026-11-07, and the Sandbox
+end-to-end check passed on both profiles. Installer 2.0.1 pinned 0.39.3, the
+first core release in which every Windows fix the installer needed had landed: Claude Code's hooks
 and the plugin's MCP server run the package's own bin when npm's global entry
 is a shell shim ([mirror#53](https://github.com/mirror-mind-ai/mirror/pull/53);
 on 0.39.0 every hook ended `node exited 1` on a Windows package install),
