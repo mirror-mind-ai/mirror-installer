@@ -101,3 +101,14 @@ Any other `mirror` subcommand is the user's, not the installer's.
 
 - **The core changes one of these** (a new `init` rule, a renamed status line, a moved config file): the daily canary (the `contract` job of `.github/workflows/installer.yml`, against `mirror-mind@latest`) turns red; the installer is fixed and a new `.exe` released. The core does not wait.
 - **The installer needs something new from the core**: a separate, small PR against the core ([mirror-mind-ai/mirror](https://github.com/mirror-mind-ai/mirror)), through its own CI — never a change here that reaches into the core. See `README.md`, "the installer consumes the core".
+
+**2.0.2 on real machines (2026-11-07):** the Sandbox demo script ran on two
+Azure Windows 11 24H2 VMs that had never seen the installer — en-US, and
+pt-BR under the real user `João Çãõ Silva` with no Git on the machine. Both:
+Node, the portable Git, Pi 1.5.0, `mirror-mind@0.40.0`, the identity page,
+Mirror opening from the Run entry, `runtime status` current (18/18
+migrations, the database under the accented profile), and the demo's
+question answered through the installed launcher in 17 s. One note for the
+script, not the installer: driven from a scheduled task rather than the
+Sandbox's LogonCommand, it cannot give Pi's window focus and skips typing;
+the question was asked through `mirror.cmd -p` instead.
